@@ -17,21 +17,6 @@ The platform provides:
 
 ---
 
-## 📚 AIM3140 Syllabus Concept Mapping
-
-| Course Module & Concept | Implementation in CASE CLOSED |
-| :--- | :--- |
-| **Web Basics & HTML5** | Semantic structure, accessible landmarks, metadata grids, data tables, and interactive form controls. |
-| **Styling & CSS3** | Custom noir styling (`main.css`), procedural background illustrations, corkboard pins, animations, box model layouts, and `@media` queries (`responsive.css`). |
-| **Bootstrap 5** | Responsive grid system, navbar toggler, card layouts, status badges, progress bars, and modal dialogs. |
-| **JavaScript & DOM** | Hotspot coordinate event listeners, live timer interval, modal openers, dynamic dialogue tree injection, and client-side form validation. |
-| **Asynchronous Web (AJAX & Fetch)** | Real-time RESTful JSON endpoints for evidence discovery, interrogation responses, hint unlocks, corkboard links, and accusation evaluation without full page reloads. |
-| **Python & Web Server** | Django WSGI/ASGI web server architecture, dynamic GET/POST request handling, URL routing, server-side data processing, and cryptographic token management. |
-| **Database & MySQL / Relational ORM** | 20 normalized Django models managing users, sessions, suspects, evidence, hotspots, connections, results, and achievements with foreign keys and unique constraints. Configured for MySQL with automatic robust SQLite fallback. |
-| **Django Framework (MVT)** | Full Model-View-Template architecture, URL dispatcher, session-based authentication, CSRF security, custom template context processors, and Django Admin portal. |
-
----
-
 ## 📁 Project Directory Structure
 
 ```text
