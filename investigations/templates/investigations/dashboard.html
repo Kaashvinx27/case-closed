@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bureau Dashboard — CASE CLOSED{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <!-- Operative Identity Bar -->
+  <div class="dossier-card border-secondary mb-4">
+    <div class="row align-items-center g-3">
+      <div class="col-md-7">
+        <div class="d-flex align-items-center gap-3">
+          <div class="suspect-avatar-box border-warning" style="width: 64px; height: 64px; font-size: 1.8rem;">
+            <i class="bi bi-person-badge-fill text-gold"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h2 class="font-serif text-light mb-0">
+                {% if user.is_authenticated %}
+                  Detective {{ user.username }}
+                {% else %}
+                  Visiting Field Operative
+                {% endif %}
+              </h2>
+              <span class="badge badge-gold font-mono">{{ badge_number }}</span>
+            </div>
+            <div class="font-mono small text-muted mt-1">
+              Rank: <span class="text-gold fw-bold">{{ user_rank }}</span>
+              {% if is_guest %}
+                &bull; <span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i> Guest Session (Temporary)</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5 text-md-end">
+        {% if is_guest %}
+          <div class="bg-dark p-2 border border-warning rounded small text-start">
+            <span class="text-gold fw-bold font-mono d-block mb-1">PROVISIONAL CLEARANCE</span>
+            <span class="text-muted">Register an account to permanently archive your score, leaderboard standing, and unlocked achievements.</span>
+            <a href="{% url 'register' %}" class="btn btn-sm btn-crimson mt-2 w-100">Enlist Permanent Badge</a>
+          </div>
+        {% else %}
+          <div class="d-inline-flex gap-3 text-start">
+            <div class="p-2 px-3 bg-dark border border-secondary rounded">
+              <span class="font-mono text-muted small d-block">TOTAL SCORE</span>
+              <strong class="font-serif text-gold fs-4">{{ total_score }}</strong>
+            </div>
+            <div class="p-2 px-3 bg-dark border border-secondary rounded">
+              <span class="font-mono text-muted small d-block">SOLVED CASES</span>
+              <strong class="font-serif text-crimson fs-4">{{ completed_cases_count }}</strong>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Left: Active Cases Dossiers -->
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="font-serif text-light mb-0"><i class="bi bi-folder-check text-gold me-2"></i> Assigned Investigation Files</h3>
+        <span class="font-mono small text-muted">{{ cases_with_status|length }} Active Files</span>
+      </div>
+
+      <div class="row g-3">
+        {% for item in cases_with_status %}
+          <div class="col-12">
+            <div class="dossier-card">
+              <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                <div>
+                  <span class="badge badge-gold font-mono me-2">{{ item.case.case_number }}</span>
+                  <span class="badge bg-{{ item.status_badge }} font-mono">{{ item.status_label }}</span>
+                </div>
+                <div class="font-mono small text-muted">
+                  Score: <strong class="text-light">{{ item.score }} PTS</strong>
+                </div>
+              </div>
+
+              <div class="row align-items-center g-3 mt-1">
+                <div class="col-md-7">
+                  <h4 class="font-serif text-light mb-1">{{ item.case.title }}</h4>
+                  <p class="font-mono small text-gold mb-2"><i class="bi bi-geo-alt"></i> {{ item.case.location }}</p>
+                  <p class="text-light small mb-0" style="color: #E2E8F0 !important;">{{ item.case.synopsis|truncatewords:20 }}</p>
+                </div>
+
+                <div class="col-md-5">
+                  <div class="bg-dark p-3 rounded border border-secondary">
+                    <div class="d-flex justify-content-between font-mono small text-muted mb-1">
+                      <span>Evidence Found:</span>
+                      <strong class="text-light">{{ item.progress_pct }}%</strong>
+                    </div>
+                    <div class="progress bg-secondary mb-3" style="height: 6px;">
+                      <div class="progress-bar bg-warning" role="progressbar" style="width: {{ item.progress_pct }}%;" aria-valuenow="{{ item.progress_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+
+                    {% if item.status_label == 'Case Closed (Solved)' %}
+                      <a href="{% url 'investigation' item.case.slug %}" class="btn btn-sm btn-outline-success w-100 font-mono">
+                        <i class="bi bi-check2-all me-1"></i> Review Solved Dossier
+                      </a>
+                    {% elif item.status_label == 'In Progress' %}
+                      <a href="{% url 'investigation' item.case.slug %}" class="btn btn-sm btn-crimson w-100 font-mono">
+                        <i class="bi bi-play-circle-fill me-1"></i> Continue Investigation
+                      </a>
+                    {% else %}
+                      <a href="{% url 'case_briefing' item.case.slug %}" class="btn btn-sm btn-bureau-secondary w-100 font-mono">
+                        <i class="bi bi-folder-symlink me-1"></i> Open Case File
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Column: Recent Activity & Badges -->
+    <div class="col-lg-4">
+      <!-- Activity Timeline -->
+      <div class="dossier-card mb-4">
+        <h5 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+          <i class="bi bi-clock-history text-crimson me-2"></i> Case Chronology
+        </h5>
+        {% if recent_activity %}
+          <div class="timeline-container">
+            {% for act in recent_activity %}
+              <div class="mb-3 ps-3 position-relative border-start border-secondary">
+                <span class="position-absolute top-0 start-0 translate-middle p-1 bg-warning border border-dark rounded-circle"></span>
+                <span class="font-mono text-gold small d-block">{{ act.created_at|date:"H:i:s" }}</span>
+                <strong class="text-light small d-block">{{ act.title }}</strong>
+                <span class="text-muted small">{{ act.content|truncatewords:14 }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted small font-mono">
+            <i class="bi bi-journal-x fs-2 text-dim d-block mb-2"></i>
+            No logged investigation activity yet.<br>
+            Select a case file to begin forensic examination.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Bureau Achievements -->
+      <div class="dossier-card">
+        <h5 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+          <i class="bi bi-award text-gold me-2"></i> Bureau Accreditations
+        </h5>
+        <div class="row g-2">
+          {% for ach in achievements %}
+            <div class="col-6">
+              <div class="p-2 bg-dark rounded border border-secondary text-center h-100 {% if ach.id in user_ach_ids %}border-warning{% else %}opacity-40{% endif %}">
+                <i class="bi bi-{{ ach.icon }} fs-3 text-{% if ach.id in user_ach_ids %}gold{% else %}muted{% endif %} d-block mb-1"></i>
+                <div class="font-serif small fw-bold text-light text-truncate" title="{{ ach.title }}">{{ ach.title }}</div>
+                <div class="font-mono text-muted text-truncate" style="font-size: 0.65rem;">{{ ach.description }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

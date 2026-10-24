@@ -1,0 +1,106 @@
+/* CASE CLOSED: Responsive Adaptations for Mobile, Tablet, & Desktop */
+
+/* Tablet & Smaller Screens (<= 992px) */
+@media (max-width: 991.98px) {
+  .investigation-header-bar {
+    padding: 0.5rem 1rem;
+  }
+
+  .crime-scene-viewport {
+    height: 460px;
+  }
+
+  .corkboard-canvas {
+    min-height: 480px;
+  }
+
+  .cork-card {
+    width: 180px;
+    padding: 0.75rem;
+  }
+
+  .investigation-split-view {
+    flex-direction: column !important;
+  }
+
+  .suspect-detail-sidebar {
+    width: 100% !important;
+    max-height: none !important;
+  }
+}
+
+/* Mobile Screens (<= 576px) */
+@media (max-width: 575.98px) {
+  .navbar-noir {
+    padding: 0.5rem 0.85rem;
+  }
+
+  .navbar-brand-bureau {
+    font-size: 1.1rem;
+  }
+
+  .hero-headline {
+    font-size: 2.1rem !important;
+  }
+
+  .crime-scene-viewport {
+    height: 380px;
+  }
+
+  .scene-hotspot-marker {
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
+  }
+
+  .corkboard-canvas {
+    padding: 0.75rem;
+    min-height: 420px;
+  }
+
+  .cork-card {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .btn-crimson, .btn-outline-gold, .btn-bureau-secondary {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    min-height: 44px;
+  }
+
+  .dossier-card {
+    padding: 1rem;
+  }
+
+  .stats-counter-number {
+    font-size: 1.8rem !important;
+  }
+
+  .investigation-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .workspace-nav-tabs {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+  }
+
+  .workspace-nav-tabs .nav-item {
+    white-space: nowrap;
+  }
+}
+
+/* Accessibility: Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Case Files Archive — CASE CLOSED{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3 pb-3 border-bottom border-secondary">
+    <div>
+      <span class="text-gold font-mono small text-uppercase">CLASSIFIED REPOSITORY</span>
+      <h2 class="font-serif text-light mb-0">Active Homicide & Intrigue Files</h2>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+      <div>
+        <label for="filter-difficulty" class="visually-hidden">Difficulty</label>
+        <select name="difficulty" id="filter-difficulty" class="form-select form-select-sm bg-dark text-light border-secondary font-mono" onchange="this.form.submit()">
+          <option value="all" {% if current_difficulty == 'all' %}selected{% endif %}>All Difficulties</option>
+          <option value="easy" {% if current_difficulty == 'easy' %}selected{% endif %}>Easy</option>
+          <option value="medium" {% if current_difficulty == 'medium' %}selected{% endif %}>Medium</option>
+          <option value="hard" {% if current_difficulty == 'hard' %}selected{% endif %}>Hard</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filter-status" class="visually-hidden">Status</label>
+        <select name="status" id="filter-status" class="form-select form-select-sm bg-dark text-light border-secondary font-mono" onchange="this.form.submit()">
+          <option value="all" {% if current_status == 'all' %}selected{% endif %}>All Statuses</option>
+          <option value="not_started" {% if current_status == 'not_started' %}selected{% endif %}>Unopened</option>
+          <option value="in_progress" {% if current_status == 'in_progress' %}selected{% endif %}>In Progress</option>
+          <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Case Closed</option>
+        </select>
+      </div>
+    </form>
+  </div>
+
+  <div class="row g-4">
+    {% for item in cases_data %}
+      <div class="col-md-6 col-lg-4">
+        <div class="dossier-card h-100 d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge badge-gold font-mono fs-6">{{ item.case.case_number }}</span>
+            <span class="badge bg-{{ item.badge_class }} font-mono small">{{ item.status_display }}</span>
+          </div>
+
+          <h3 class="font-serif text-light mb-1">{{ item.case.title }}</h3>
+          <p class="font-mono small text-gold mb-3">
+            <i class="bi bi-geo-alt-fill me-1"></i> {{ item.case.location }}
+          </p>
+
+          <p class="text-light small flex-grow-1" style="color: #E2E8F0 !important; line-height: 1.6;">
+            {{ item.case.synopsis }}
+          </p>
+
+          <div class="bg-dark p-3 rounded border border-secondary font-mono small text-muted mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Difficulty:</span>
+              <strong class="text-light">{{ item.case.difficulty }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Est. Duration:</span>
+              <span class="text-light">{{ item.case.estimated_time }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Suspects:</span>
+              <span class="text-gold">{{ item.case.suspects.count }} Persons of Interest</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Evidence Clues:</span>
+              <span class="text-crimson">{{ item.case.evidence_items.count }} Physical Items</span>
+            </div>
+          </div>
+
+          {% if item.status == 'in_progress' %}
+            <a href="{% url 'investigation' item.case.slug %}" class="btn btn-crimson w-100 font-mono">
+              <i class="bi bi-play-circle-fill me-1"></i> Resume Investigation
+            </a>
+          {% else %}
+            <a href="{% url 'case_briefing' item.case.slug %}" class="btn btn-outline-gold w-100 font-mono">
+              <i class="bi bi-file-earmark-text-fill me-1"></i> Review Formal Briefing
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 text-center py-5">
+        <div class="dossier-card text-center py-5">
+          <i class="bi bi-folder-x fs-1 text-dim d-block mb-3"></i>
+          <h4 class="font-serif text-light">No Matching Case Records</h4>
+          <p class="text-muted small">No classified files meet the selected filter criteria.</p>
+          <a href="{% url 'cases_list' %}" class="btn btn-sm btn-bureau-secondary font-mono mt-2">Reset Filters</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

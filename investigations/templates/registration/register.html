@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Operative Recruitment — CASE CLOSED{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-lg-4" style="max-width: 520px;">
+  <div class="dossier-card border-secondary">
+    <div class="text-center mb-4">
+      <div class="rounded-circle bg-dark border border-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+        <i class="bi bi-person-plus-fill text-gold fs-3"></i>
+      </div>
+      <span class="stamp-classified mb-2">OPERATIVE ENLISTMENT</span>
+      <h2 class="font-serif text-light mt-2 mb-1">Bureau Recruitment</h2>
+      <p class="text-muted small font-mono">Create your permanent detective credentials.</p>
+    </div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger font-mono small py-2 mb-3 bg-dark border-danger text-danger">
+          {% for err in form.non_field_errors %}
+            <div><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ err }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="{{ form.username.id_for_label }}" class="form-label font-mono small text-gold">Chosen Detective Callsign</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="text-danger small font-mono mt-1">{{ form.username.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.email.id_for_label }}" class="form-label font-mono small text-gold">Official Bureau Dispatch Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="text-danger small font-mono mt-1">{{ form.email.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.password.id_for_label }}" class="form-label font-mono small text-gold">Security Passphrase</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+          <div class="text-danger small font-mono mt-1">{{ form.password.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-4">
+        <label for="{{ form.confirm_password.id_for_label }}" class="form-label font-mono small text-gold">Confirm Passphrase</label>
+        {{ form.confirm_password }}
+        {% if form.confirm_password.errors %}
+          <div class="text-danger small font-mono mt-1">{{ form.confirm_password.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-crimson w-100 font-mono py-2 mb-3">
+        <i class="bi bi-shield-plus me-1"></i> Issue Official Bureau Badge
+      </button>
+
+      <div class="d-flex justify-content-between font-mono small text-muted border-top border-secondary pt-3">
+        <span>Already enlisted?</span>
+        <a href="{% url 'login' %}" class="text-gold text-decoration-none">Sign In with Badge</a>
+      </div>
+
+      <div class="mt-3 text-center">
+        <a href="{% url 'dashboard' %}" class="font-mono small text-muted text-decoration-none">
+          <i class="bi bi-arrow-left me-1"></i> Play as Guest Detective
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

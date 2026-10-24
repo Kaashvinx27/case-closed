@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CASE CLOSED — Every Secret Leaves a Trace{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="position-relative overflow-hidden py-5 py-lg-6" style="background: radial-gradient(circle at 50% 30%, #191F27 0%, #0B0D10 70%); border-bottom: 1px solid var(--border-muted);">
+  <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" style="background-image: repeating-linear-gradient(45deg, #262E3B 0, #262E3B 1px, transparent 0, transparent 50%); background-size: 20px 20px; pointer-events: none;"></div>
+
+  <div class="container position-relative py-lg-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="d-inline-flex align-items-center gap-2 mb-3 px-3 py-1 bg-dark border border-secondary rounded-pill font-mono small">
+          <span class="badge-crimson px-2 py-0.5 rounded-pill text-uppercase">CLASSIFIED ACCESS</span>
+          <span class="text-gold">CRIMINAL INVESTIGATION DIVISION</span>
+        </div>
+
+        <h1 class="display-3 fw-bold hero-headline text-light mb-3">
+          Every Secret <br>
+          <span class="text-crimson fst-italic">Leaves a Trace.</span>
+        </h1>
+
+        <p class="lead text-muted mb-4" style="max-width: 620px;">
+          Enter an elite investigative agency. Examine physical crime scenes, interrogate guarded suspects, identify verbal contradictions, connect clues with red yarn on the corkboard, and authoritatively submit your final murder accusation.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <a href="{% url 'dashboard' %}" class="btn btn-crimson btn-lg px-4 py-3">
+            <i class="bi bi-door-open-fill me-2"></i> ENTER THE BUREAU
+          </a>
+          <a href="{% url 'how_to_play' %}" class="btn btn-outline-gold btn-lg px-4 py-3">
+            <i class="bi bi-compass me-2"></i> HOW IT WORKS
+          </a>
+        </div>
+
+        <!-- Real Database Metrics (No fake numbers) -->
+        <div class="row g-4 pt-4 border-top border-secondary">
+          <div class="col-4">
+            <div class="font-serif fs-2 fw-bold text-light stats-counter-number">{{ total_cases }}</div>
+            <div class="font-mono text-muted small text-uppercase">Active Mysteries</div>
+          </div>
+          <div class="col-4">
+            <div class="font-serif fs-2 fw-bold text-gold stats-counter-number">{{ total_detectives }}</div>
+            <div class="font-mono text-muted small text-uppercase">Enlisted Operatives</div>
+          </div>
+          <div class="col-4">
+            <div class="font-serif fs-2 fw-bold text-crimson stats-counter-number">{{ completed_investigations }}</div>
+            <div class="font-mono text-muted small text-uppercase">Closed Warrants</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Dossier Preview Card -->
+      <div class="col-lg-5">
+        {% if featured_case %}
+          <div class="dossier-card border-warning shadow-lg">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="stamp-classified">PRIORITY CASE</span>
+              <span class="badge badge-gold font-mono">{{ featured_case.case_number }}</span>
+            </div>
+
+            <h3 class="font-serif text-light mb-2">{{ featured_case.title }}</h3>
+            <p class="text-gold small font-mono mb-3"><i class="bi bi-geo-alt-fill me-1"></i> {{ featured_case.location }}</p>
+
+            <p class="text-muted small mb-4">
+              {{ featured_case.synopsis|truncatewords:28 }}
+            </p>
+
+            <div class="bg-dark p-3 rounded border border-secondary mb-4 font-mono small">
+              <div class="d-flex justify-content-between text-muted mb-1">
+                <span>Victim:</span>
+                <strong class="text-light">{{ featured_case.victim_name }}</strong>
+              </div>
+              <div class="d-flex justify-content-between text-muted mb-1">
+                <span>Difficulty:</span>
+                <span class="text-warning fw-bold">{{ featured_case.difficulty }}</span>
+              </div>
+              <div class="d-flex justify-content-between text-muted">
+                <span>Estimated Time:</span>
+                <span class="text-light">{{ featured_case.estimated_time }}</span>
+              </div>
+            </div>
+
+            <a href="{% url 'case_briefing' featured_case.slug %}" class="btn btn-crimson w-100">
+              <i class="bi bi-folder-symlink-fill me-2"></i> Review Case Dossier
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Investigation Mechanics (How It Works) -->
+<section class="py-5 bg-secondary">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <span class="text-gold font-mono small text-uppercase tracking-wider">INVESTIGATION PROTOCOL</span>
+      <h2 class="font-serif display-5 text-light mt-1">Four Steps to Solve a Mystery</h2>
+      <div class="mx-auto mt-2" style="width: 60px; height: 3px; background-color: var(--accent-crimson);"></div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="dossier-card h-100 text-center">
+          <div class="rounded-circle bg-dark border border-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+            <i class="bi bi-search text-gold fs-3"></i>
+          </div>
+          <span class="font-mono text-muted small">PHASE 01</span>
+          <h5 class="font-serif text-light mt-1 mb-2">Examine Hotspots</h5>
+          <p class="text-muted small mb-0">Search physical crime scene coordinates. Uncover documents, toxicological residues, and weapon markings.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="dossier-card h-100 text-center">
+          <div class="rounded-circle bg-dark border border-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+            <i class="bi bi-chat-left-quote text-crimson fs-3"></i>
+          </div>
+          <span class="font-mono text-muted small">PHASE 02</span>
+          <h5 class="font-serif text-light mt-1 mb-2">Interrogate Suspects</h5>
+          <p class="text-muted small mb-0">Question each subject on their alibis and motives. Unlock deeper dialogue trees by discovering physical clues.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="dossier-card h-100 text-center">
+          <div class="rounded-circle bg-dark border border-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+            <i class="bi bi-pin-angle text-gold fs-3"></i>
+          </div>
+          <span class="font-mono text-muted small">PHASE 03</span>
+          <h5 class="font-serif text-light mt-1 mb-2">Yarn the Corkboard</h5>
+          <p class="text-muted small mb-0">Pin discovered evidence cards and connect red yarn strings between suspects, alibis, and forensic reports.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="dossier-card h-100 text-center">
+          <div class="rounded-circle bg-dark border border-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+            <i class="bi bi-shield-lock text-crimson fs-3"></i>
+          </div>
+          <span class="font-mono text-muted small">PHASE 04</span>
+          <h5 class="font-serif text-light mt-1 mb-2">Authoritative Accusation</h5>
+          <p class="text-muted small mb-0">Submit your final warrant. The backend validates your deduction against the authoritative solution.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Available Case Files Grid -->
+<section class="py-5 bg-primary">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+      <div>
+        <span class="text-crimson font-mono small text-uppercase">CASE REPOSITORY</span>
+        <h2 class="font-serif text-light mb-0">Active Classified Files</h2>
+      </div>
+      <a href="{% url 'cases_list' %}" class="btn btn-sm btn-outline-gold">
+        View All Files <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for case in cases %}
+        <div class="col-md-4">
+          <div class="dossier-card h-100 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge badge-gold font-mono">{{ case.case_number }}</span>
+              <span class="badge bg-dark border border-secondary text-light font-mono">{{ case.difficulty }}</span>
+            </div>
+
+            <h4 class="font-serif text-light mb-1">{{ case.title }}</h4>
+            <div class="font-mono small text-gold mb-3">{{ case.genre }} &bull; {{ case.location }}</div>
+
+            <p class="text-muted small flex-grow-1">
+              {{ case.synopsis|truncatewords:24 }}
+            </p>
+
+            <div class="bg-dark p-2 rounded border border-secondary font-mono small text-muted mb-3 d-flex justify-content-around">
+              <span><i class="bi bi-people text-gold me-1"></i> {{ case.suspects.count }} Suspects</span>
+              <span><i class="bi bi-search text-crimson me-1"></i> {{ case.evidence_items.count }} Evidence</span>
+            </div>
+
+            <a href="{% url 'case_briefing' case.slug %}" class="btn btn-bureau-secondary w-100">
+              <i class="bi bi-eye-fill me-1"></i> Inspect Briefing
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,573 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Investigating: {{ case.case_number }} — CASE CLOSED{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/investigation.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="investigation-workspace-root" class="investigation-container" data-case-slug="{{ case.slug }}">
+
+  <!-- 1. Investigation Header Bar -->
+  <div class="investigation-header-bar">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'dashboard' %}" class="btn btn-sm btn-bureau-secondary font-mono" title="Suspend & Return to Dashboard">
+        <i class="bi bi-arrow-left me-1"></i> Exit
+      </a>
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge badge-gold font-mono">{{ case.case_number }}</span>
+          <h4 class="font-serif text-light mb-0">{{ case.title }}</h4>
+        </div>
+        <span class="text-muted small font-mono">{{ case.location }}</span>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Counters -->
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <!-- Authoritative Timer -->
+      <div class="bg-dark px-3 py-1 rounded border border-secondary font-mono text-center">
+        <span class="text-muted d-block" style="font-size: 0.65rem;">SESSION TIME</span>
+        <span id="investigation-timer-display" class="text-gold fw-bold">00:00</span>
+      </div>
+
+      <!-- Evidence Meter -->
+      <div class="bg-dark px-3 py-1 rounded border border-secondary font-mono text-center" style="min-width: 140px;">
+        <div class="d-flex justify-content-between text-muted" style="font-size: 0.65rem;">
+          <span>EVIDENCE</span>
+          <span id="discovered-evidence-count" class="text-light">{{ discovered_items|length }} / {{ total_evidence_count }}</span>
+        </div>
+        <div class="progress bg-secondary mt-1" style="height: 5px;">
+          <div id="investigation-progress-bar" class="progress-bar bg-warning" role="progressbar" style="width: {% widthratio discovered_items|length total_evidence_count 100 %}%;"></div>
+        </div>
+      </div>
+
+      <!-- Score Badge -->
+      <div class="bg-dark px-3 py-1 rounded border border-warning font-mono text-center">
+        <span class="text-muted d-block" style="font-size: 0.65rem;">SCORE</span>
+        <span id="session-score-badge" class="text-warning fw-bold">{{ session.score }} PTS</span>
+      </div>
+
+      <!-- Final Accusation Button -->
+      <button class="btn btn-crimson font-mono fw-bold" data-bs-toggle="modal" data-bs-target="#accusationModal">
+        <i class="bi bi-shield-shaded me-1"></i> MAKE ACCUSATION
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Navigation Tabs -->
+  <div class="bg-dark border-bottom border-secondary px-3 py-2">
+    <ul class="nav nav-pills workspace-nav-tabs" id="workspaceTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active font-mono" id="scene-tab" data-bs-toggle="tab" data-bs-target="#tab-scene" type="button" role="tab">
+          <i class="bi bi-search me-1"></i> Crime Scene Coordinates
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link font-mono" id="suspects-tab" data-bs-toggle="tab" data-bs-target="#tab-suspects" type="button" role="tab">
+          <i class="bi bi-people-fill me-1"></i> Suspect Interrogation Room
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link font-mono" id="corkboard-tab" data-bs-toggle="tab" data-bs-target="#tab-corkboard" type="button" role="tab">
+          <i class="bi bi-pin-angle-fill me-1"></i> Evidence Corkboard
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link font-mono" id="journal-tab" data-bs-toggle="tab" data-bs-target="#tab-journal" type="button" role="tab">
+          <i class="bi bi-journal-text me-1"></i> Case Journal & Notes
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link font-mono" id="hints-tab" data-bs-toggle="tab" data-bs-target="#tab-hints" type="button" role="tab">
+          <i class="bi bi-lightbulb-fill text-warning me-1"></i> Bureau Hints
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab Content Containers -->
+  <div class="tab-content flex-grow-1 p-3 p-lg-4" id="workspaceTabsContent">
+
+    <!-- 2. CRIME SCENE VIEWPORT -->
+    <div class="tab-pane fade show active" id="tab-scene" role="tabpanel">
+      <div class="crime-scene-viewport scene-bg-{{ case.scene_theme }}" id="crimeSceneContainer">
+        <div class="scene-grid-overlay"></div>
+
+        <!-- Room Header Watermark -->
+        <div class="position-absolute top-0 start-0 m-3 z-3 bg-dark px-3 py-1 rounded border border-secondary font-mono small text-muted">
+          <span class="text-gold"><i class="bi bi-camera-fill me-1"></i> SCENE:</span> {{ case.scene_title }}
+        </div>
+
+        <!-- Interactive Hotspot Markers -->
+        {% for item in hotspots_data %}
+          <div class="scene-hotspot-marker {% if item.is_discovered %}discovered{% endif %}"
+               style="left: {{ item.hotspot.x_percent }}%; top: {{ item.hotspot.y_percent }}%;"
+               data-evidence-id="{{ item.hotspot.evidence.id }}"
+               data-label="{{ item.hotspot.label }}"
+               tabindex="0"
+               role="button"
+               aria-label="Inspect coordinate: {{ item.hotspot.label }}">
+            <i class="bi bi-{{ item.hotspot.icon }}"></i>
+            <div class="hotspot-tooltip">
+              {% if item.is_discovered %}
+                <span class="text-success">[CATALOGED]</span> {{ item.hotspot.evidence.name }}
+              {% else %}
+                <span class="text-warning">[INSPECT]</span> {{ item.hotspot.label }}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- Instruction Overlay Bottom -->
+        <div class="position-absolute bottom-0 start-0 m-3 z-3 bg-dark p-2 px-3 rounded border border-secondary font-mono small text-muted d-none d-md-block">
+          <i class="bi bi-hand-index-thumb text-gold me-1"></i> Click hotspot coordinates on the map to search for physical clues and documents.
+        </div>
+      </div>
+
+      <!-- Quick Catalog of Discovered Evidence Items -->
+      <div class="mt-4">
+        <h5 class="font-serif text-light mb-3"><i class="bi bi-box-seam text-gold me-2"></i> Evidence Locker ({{ discovered_items|length }} Cataloged)</h5>
+        <div class="row g-2" id="discovered-evidence-grid">
+          {% for ev in discovered_items %}
+            <div class="col-md-3 col-6">
+              <div class="p-2 bg-dark rounded border border-secondary font-mono small d-flex align-items-center gap-2">
+                <i class="bi bi-{{ ev.image_icon }} text-crimson fs-4"></i>
+                <div class="text-truncate">
+                  <span class="text-gold d-block fw-bold">{{ ev.code }}</span>
+                  <span class="text-light text-truncate d-block">{{ ev.name }}</span>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12 text-muted small font-mono">
+              No evidence cataloged yet. Inspect the glowing coordinates in the crime scene above.
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SUSPECT BOARD & INTERROGATION ROOM -->
+    <div class="tab-pane fade" id="tab-suspects" role="tabpanel">
+      <div class="row g-4">
+        <!-- Suspects Selector List -->
+        <div class="col-lg-4">
+          <h5 class="font-serif text-light mb-3"><i class="bi bi-person-lines-fill text-gold me-2"></i> Persons of Interest</h5>
+          <div class="d-flex flex-column gap-2" id="suspectsList">
+            {% for s in suspects %}
+              <div class="dossier-card suspect-select-item p-3 cursor-pointer {% if forloop.first %}border-warning bg-elevated{% endif %}"
+                   data-suspect-id="{{ s.id }}">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="suspect-avatar-box">
+                    <i class="bi bi-{{ s.portrait_icon }}"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="font-serif text-light mb-0">{{ s.name }}</h5>
+                    <span class="font-mono text-gold small d-block">{{ s.occupation }} (Age {{ s.age }})</span>
+                    <span class="text-muted small font-mono">{{ s.relationship_to_victim }}</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Interrogation Interface -->
+        <div class="col-lg-8">
+          {% for s in suspects %}
+            <div class="suspect-interrogation-panel {% if not forloop.first %}d-none{% endif %}" id="suspect-panel-{{ s.id }}">
+              <div class="dossier-card mb-3">
+                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                  <div>
+                    <h3 class="font-serif text-light mb-0">{{ s.name }}</h3>
+                    <span class="text-gold font-mono small">{{ s.relationship_to_victim }}</span>
+                  </div>
+                  <span class="badge badge-gold font-mono">INTERROGATION TRANSCRIPT</span>
+                </div>
+
+                <div class="row g-2 mb-3 bg-dark p-3 rounded border border-secondary font-mono small">
+                  <div class="col-md-6">
+                    <strong class="text-muted d-block">STATED ALIBI:</strong>
+                    <span class="text-light">{{ s.alibi }}</span>
+                  </div>
+                  <div class="col-md-6">
+                    <strong class="text-muted d-block">KNOWN MOTIVE:</strong>
+                    <span class="text-danger">{{ s.known_motive }}</span>
+                  </div>
+                </div>
+
+                <!-- Opening Statement -->
+                <div class="dialogue-bubble">
+                  <strong class="text-gold font-mono small d-block mb-1">RECORDED OPENING STATEMENT:</strong>
+                  "{{ s.opening_statement }}"
+                </div>
+              </div>
+
+              <!-- Question Topics Palette -->
+              <div class="dossier-card mb-3">
+                <h6 class="font-serif text-gold mb-3"><i class="bi bi-chat-dots-fill me-2"></i> Investigation Topics</h6>
+                <div class="d-flex flex-wrap gap-2 interrogation-questions-list" id="interrogation-questions-list-{{ s.id }}">
+                  {% for topic in s.interview_topics.all %}
+                    <button class="btn btn-sm btn-bureau-secondary ask-topic-btn font-mono {% if topic.required_evidence and topic.required_evidence.id not in discovered_ids %}locked-topic text-muted border-secondary{% endif %}"
+                            data-suspect-id="{{ s.id }}"
+                            data-topic-id="{{ topic.id }}"
+                            data-topic-key="{{ topic.topic_key }}"
+                            data-is-locked="{% if topic.required_evidence and topic.required_evidence.id not in discovered_ids %}true{% else %}false{% endif %}"
+                            data-required-code="{% if topic.required_evidence %}{{ topic.required_evidence.code }}{% endif %}"
+                            data-required-name="{% if topic.required_evidence %}{{ topic.required_evidence.name }}{% endif %}">
+                      <i class="bi bi-chat-quote me-1"></i> {{ topic.title }}
+                      {% if topic.required_evidence and topic.required_evidence.id not in discovered_ids %}
+                        <span class="badge bg-secondary ms-1 lock-indicator" title="Requires Evidence [{{ topic.required_evidence.code }}]">
+                          <i class="bi bi-lock-fill"></i>
+                        </span>
+                      {% elif topic.id in interviewed_topics %}
+                        <span class="badge bg-dark text-gold border border-warning ms-1" title="Questioned">
+                          <i class="bi bi-check-lg"></i>
+                        </span>
+                      {% endif %}
+                    </button>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <!-- Dialogue Transcript Box -->
+              <div class="dossier-card">
+                <h6 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+                  <i class="bi bi-record-circle text-crimson me-2"></i> Interrogation Audio Log
+                </h6>
+                <div class="dialogue-log-container" id="dialogue-log-{{ s.id }}" style="max-height: 280px; min-height: 120px; overflow-y: auto;">
+                  {% if s.recorded_interviews %}
+                    {% for rec in s.recorded_interviews %}
+                      <div class="mb-3 dialogue-entry">
+                        <div class="dialogue-bubble player-question">
+                          <strong class="text-crimson font-mono small d-block mb-1">DETECTIVE QUESTION:</strong>
+                          {{ rec.topic.question_text }}
+                        </div>
+                        {% if rec.contradiction_exposed %}
+                          <div class="contradiction-banner mb-2">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> CONTRADICTION ESTABLISHED — STATEMENT REFUTED!
+                          </div>
+                        {% endif %}
+                        <div class="dialogue-bubble">
+                          <strong class="text-gold font-mono small d-block mb-1">SUBJECT RESPONSE:</strong>
+                          {% if rec.contradiction_exposed and rec.topic.contradiction_reaction %}
+                            {{ rec.topic.contradiction_reaction }}
+                          {% else %}
+                            {{ rec.topic.response_text }}
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="text-muted small font-mono text-center py-3 empty-interview-msg">
+                      Select a topic above to press the subject on their testimony.
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. INTERACTIVE EVIDENCE CORKBOARD -->
+    <div class="tab-pane fade" id="tab-corkboard" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h4 class="font-serif text-light mb-0"><i class="bi bi-pin-angle-fill text-crimson me-2"></i> Detective Corkboard</h4>
+          <span class="font-mono text-muted small">Select any card, then click a second card to connect with red investigative yarn.</span>
+        </div>
+        <button id="clearConnectionsBtn" class="btn btn-sm btn-bureau-secondary font-mono">
+          <i class="bi bi-eraser me-1"></i> Reset Red Strings
+        </button>
+      </div>
+
+      <div class="corkboard-canvas position-relative" id="corkboardCanvas"
+           data-case-slug="{{ case.slug }}"
+           data-initial-connections='[
+             {% for c in connections %}
+               {"id": {{ c.id }}, "source_type": "{{ c.source_type }}", "source_id": {{ c.source_id }}, "target_type": "{{ c.target_type }}", "target_id": {{ c.target_id }}}{% if not forloop.last %},{% endif %}
+             {% endfor %}
+           ]'>
+        <!-- SVG yarn line rendering overlay -->
+        <svg class="corkboard-svg-overlay" id="corkboardSvg"></svg>
+
+        <!-- Pinned Cards Container -->
+        <div class="d-flex flex-wrap gap-3 position-relative z-2" id="corkboardCardsGrid">
+          <!-- Suspect Cards -->
+          {% for s in suspects %}
+            <div class="cork-card" data-type="suspect" data-id="{{ s.id }}" data-title="{{ s.name }}">
+              <div class="cork-pin"></div>
+              <span class="badge-gold font-mono small d-block mb-1">SUSPECT</span>
+              <h6 class="fw-bold mb-1 font-serif text-dark">{{ s.name }}</h6>
+              <p class="small text-muted mb-0 font-mono">{{ s.occupation }}</p>
+            </div>
+          {% endfor %}
+
+          <!-- Cataloged Evidence Cards -->
+          {% for ev in discovered_items %}
+            <div class="cork-card" data-type="evidence" data-id="{{ ev.id }}" data-title="{{ ev.name }}">
+              <div class="cork-pin"></div>
+              <span class="badge-crimson font-mono small d-block mb-1">{{ ev.code }}</span>
+              <h6 class="fw-bold mb-1 font-serif text-dark">{{ ev.name }}</h6>
+              <p class="small text-muted mb-0 font-mono">{{ ev.evidence_type }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. CASE JOURNAL & NOTES -->
+    <div class="tab-pane fade" id="tab-journal" role="tabpanel">
+      <div class="row g-4">
+        <!-- Detective Notepad Form -->
+        <div class="col-lg-5">
+          <div class="dossier-card mb-4">
+            <h5 class="font-serif text-light mb-3"><i class="bi bi-pencil-square text-gold me-2"></i> Pin Personal Note</h5>
+            <form id="detectiveNoteForm">
+              <div class="mb-3">
+                <label for="detectiveNoteInput" class="visually-hidden">Investigator deduction note</label>
+                <textarea id="detectiveNoteInput" class="form-control font-mono small" rows="4" placeholder="Record chronological deduction or suspicious timestamps..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-sm btn-crimson font-mono w-100">
+                <i class="bi bi-pin-fill me-1"></i> Pin Note to Journal
+              </button>
+            </form>
+          </div>
+
+          <div class="dossier-card">
+            <h6 class="font-serif text-light mb-3"><i class="bi bi-stickies text-gold me-2"></i> Pinned Notes</h6>
+            <div id="detectiveNotesContainer">
+              {% for note in notes %}
+                <div class="p-2 mb-2 bg-dark border border-secondary rounded font-mono small text-light">
+                  <span class="text-gold">[{{ note.created_at|date:"H:i:s" }}]</span> {{ note.content }}
+                </div>
+              {% empty %}
+                <span class="text-muted small font-mono">No personal deductions pinned yet.</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Official Journal Chronology -->
+        <div class="col-lg-7">
+          <div class="dossier-card">
+            <h5 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+              <i class="bi bi-journal-album text-crimson me-2"></i> Bureau Incident Chronology
+            </h5>
+            <div class="timeline-container" id="journalTimeline">
+              {% for entry in journal %}
+                <div class="mb-3 ps-3 position-relative border-start border-secondary">
+                  <span class="position-absolute top-0 start-0 translate-middle p-1 bg-warning border border-dark rounded-circle"></span>
+                  <div class="font-mono text-gold small">{{ entry.created_at|date:"H:i:s" }} &bull; {{ entry.entry_type|upper }}</div>
+                  <strong class="text-light d-block">{{ entry.title }}</strong>
+                  <p class="text-muted small mb-0">{{ entry.content }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. BUREAU HINTS -->
+    <div class="tab-pane fade" id="tab-hints" role="tabpanel">
+      <div class="dossier-card" style="max-width: 800px; margin: 0 auto;">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+          <div>
+            <h4 class="font-serif text-light mb-0"><i class="bi bi-lightbulb-fill text-warning me-2"></i> Tactical Bureau Hints</h4>
+            <span class="font-mono text-muted small">Headquarters analysts can provide direction at the cost of final score penalties.</span>
+          </div>
+          <span class="badge badge-gold font-mono">PENALTY ACCUMULATOR: -{{ session.hint_penalty_total }} PTS</span>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+          {% for h in hints %}
+            <div class="p-3 bg-dark border border-secondary rounded">
+              <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                <span class="font-mono fw-bold text-light">
+                  <i class="bi bi-shield-lock me-1"></i> Level {{ h.hint_level }}: 
+                  {% if h.hint_level == 1 %}Broad Direction{% elif h.hint_level == 2 %}Specific Clue{% else %}Critical Deduction{% endif %}
+                </span>
+                <span class="badge {% if h.penalty_points > 0 %}badge-crimson{% else %}badge-gold{% endif %} font-mono">
+                  {% if h.penalty_points > 0 %}-{{ h.penalty_points }} PTS{% else %}FREE FIRST CONSULTATION{% endif %}
+                </span>
+              </div>
+
+              <div id="hint-body-{{ h.hint_level }}">
+                {% if h.id in hints_used %}
+                  <div class="p-3 bg-dark border border-warning rounded">
+                    <strong class="text-gold font-mono d-block mb-1">BUREAU ANALYST BRIEFING:</strong>
+                    <p class="mb-0 text-light">{{ h.hint_text }}</p>
+                  </div>
+                {% else %}
+                  <p class="text-muted small mb-3">Dossier sealed. Consulting this intelligence will deduct {{ h.penalty_points }} points from your final evaluation score.</p>
+                  <button class="btn btn-sm btn-outline-gold font-mono request-hint-btn"
+                          data-hint-level="{{ h.hint_level }}"
+                          data-hint-penalty="{{ h.penalty_points }}">
+                    <i class="bi bi-key me-1"></i> Decrypt Level {{ h.hint_level }} Intelligence
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Evidence Detail Modal -->
+<div class="modal fade" id="evidenceDetailModal" tabindex="-1" aria-labelledby="evidenceModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary text-light">
+      <div class="modal-header border-secondary">
+        <div>
+          <span class="badge badge-crimson font-mono mb-1" id="evidenceModalCode">EVIDENCE-ID</span>
+          <h5 class="modal-title font-serif text-light" id="evidenceModalTitle">Evidence Name</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body font-mono">
+        <div class="p-2 mb-3 bg-elevated rounded border border-secondary small">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Type:</span>
+            <strong class="text-gold" id="evidenceModalType">Physical</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Location Recovered:</span>
+            <span class="text-light" id="evidenceModalLocation">Study</span>
+          </div>
+        </div>
+
+        <h6 class="text-muted small mb-1">PHYSICAL DESCRIPTION:</h6>
+        <p class="text-light small mb-3" id="evidenceModalDesc">Detailed forensic report text...</p>
+
+        <h6 class="text-gold small mb-1">FORENSIC OBSERVATIONS:</h6>
+        <div class="p-2 bg-dark border border-warning rounded text-warning small" id="evidenceModalForensics">
+          Forensic chemical trace notes...
+        </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-sm btn-bureau-secondary font-mono" data-bs-dismiss="modal">Close File</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Final Accusation Submission Modal -->
+<div class="modal fade" id="accusationModal" tabindex="-1" aria-labelledby="accusationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark border-danger text-light">
+      <div class="modal-header bg-secondary border-danger">
+        <div>
+          <span class="stamp-classified">FORMAL ARREST WARRANT</span>
+          <h4 class="modal-title font-serif text-light mt-1" id="accusationModalLabel">Submit Final Accusation</h4>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="accusationForm">
+        <div class="modal-body p-4">
+          <p class="text-muted small font-mono mb-4">
+            Warning: The Bureau will test your arrest warrant against authoritative ballistic, forensic, and testimonial records. False accusations carry score penalties.
+          </p>
+
+          <!-- 1. Suspect Selection -->
+          <div class="mb-4">
+            <label for="accuseSuspectSelect" class="form-label text-gold font-mono small fw-bold">1. PRIME SUSPECT IDENTIFICATION</label>
+            <select id="accuseSuspectSelect" class="form-select bg-dark text-light border-secondary font-mono" required>
+              <option value="" disabled selected>Designate the perpetrator...</option>
+              {% for s in suspects %}
+                <option value="{{ s.id }}">{{ s.name }} ({{ s.occupation }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- 2. Motive -->
+          <div class="mb-4">
+            <label for="accuseMotiveInput" class="form-label text-gold font-mono small fw-bold">2. UNDERLYING MOTIVE</label>
+            <input type="text" id="accuseMotiveInput" class="form-control font-mono small" placeholder="e.g. Embezzlement and Financial Fraud, or Art Forgery and Theft" required>
+          </div>
+
+          <!-- 3. Key Supporting Evidence -->
+          <div class="mb-4">
+            <label class="form-label text-gold font-mono small fw-bold d-block">3. SUPPORTING PHYSICAL EVIDENCE (Select 2-4 items)</label>
+            <div class="row g-2" style="max-height: 180px; overflow-y: auto;">
+              {% for ev in case.evidence_items.all %}
+                <div class="col-md-6">
+                  <div class="form-check p-2 bg-dark rounded border border-secondary font-mono small">
+                    <input class="form-check-input ms-1 me-2" type="checkbox" name="accuse_evidence" value="{{ ev.id }}" id="accEv{{ ev.id }}">
+                    <label class="form-check-label text-light" for="accEv{{ ev.id }}">
+                      <strong class="text-gold">[{{ ev.code }}]</strong> {{ ev.name }}
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- 4. Chronological Reasoning -->
+          <div class="mb-3">
+            <label for="accuseReasoningInput" class="form-label text-gold font-mono small fw-bold">4. DEDUCTION REASONING & ALIBI REFUTATION</label>
+            <textarea id="accuseReasoningInput" class="form-control font-mono small" rows="4" placeholder="Detail how the physical evidence and timeline disprove the suspect's alibi..." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-bureau-secondary font-mono" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" id="submitAccusationBtn" class="btn btn-crimson font-mono px-4">
+            <i class="bi bi-shield-lock-fill me-1"></i> Transmit Warrant to Bureau
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Verdict & Epilogue Modal -->
+<div class="modal fade" id="verdictModal" tabindex="-1" aria-labelledby="verdictModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary text-light">
+      <div class="modal-body p-4 p-lg-5">
+        <div id="verdictBox" class="verdict-box">
+          <h2 class="font-serif display-5 mb-2" id="verdictTitle">Case Outcome</h2>
+          <div class="font-mono text-muted mb-3">
+            Rank Earned: <span class="text-gold fw-bold fs-5" id="verdictRank">Senior Investigator</span> &bull; 
+            Score: <span class="text-warning fw-bold fs-5" id="verdictScore">0 PTS</span>
+          </div>
+          <p class="lead text-light mb-0" id="verdictFeedback">Feedback details...</p>
+        </div>
+
+        <!-- Secret Solution Epilogue -->
+        <div id="verdictEpilogue" class="d-none p-3 bg-dark border border-warning rounded font-mono small mb-4">
+          <h5 class="text-gold font-serif mb-2"><i class="bi bi-journal-bookmark me-2"></i> Bureau Official Epilogue</h5>
+          <p class="text-light mb-0" id="verdictEpilogueText">Epilogue text...</p>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+          <a href="{% url 'dashboard' %}" class="btn btn-crimson font-mono px-4">
+            <i class="bi bi-grid-1x2 me-1"></i> Return to Bureau Dashboard
+          </a>
+          <a href="{% url 'leaderboard' %}" class="btn btn-outline-gold font-mono px-4">
+            <i class="bi bi-trophy me-1"></i> View Leaderboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.discoveredEvidenceIds = {{ discovered_ids_json|safe }};
+</script>
+<script src="{% static 'js/investigation.js' %}"></script>
+<script src="{% static 'js/evidence_board.js' %}"></script>
+{% endblock %}

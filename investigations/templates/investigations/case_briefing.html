@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classified Briefing: {{ case.case_number }} — CASE CLOSED{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5" style="max-width: 920px;">
+  <div class="dossier-card border-secondary position-relative">
+    <!-- Header Stamps -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary flex-wrap gap-2">
+      <div>
+        <span class="stamp-classified me-2">CLASSIFIED DOSSIER</span>
+        <span class="badge badge-gold font-mono">{{ case.case_number }}</span>
+      </div>
+      <div class="font-mono text-muted small">
+        Clearance Level: <strong class="text-light">OP-4 DETECTIVE</strong>
+      </div>
+    </div>
+
+    <!-- Official Case Title & Subtitle -->
+    <h1 class="font-serif display-4 text-light mb-2">{{ case.title }}</h1>
+    <div class="font-mono text-gold mb-4">
+      <i class="bi bi-calendar3 me-1"></i> {{ case.incident_date }} &bull; 
+      <i class="bi bi-geo-alt-fill me-1"></i> {{ case.location }}
+    </div>
+
+    <!-- Case Metadata Grid -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="p-2 px-3 bg-dark border border-secondary rounded font-mono small">
+          <span class="text-muted d-block" style="font-size: 0.75rem;">GENRE</span>
+          <strong class="text-light">{{ case.genre }}</strong>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="p-2 px-3 bg-dark border border-secondary rounded font-mono small">
+          <span class="text-muted d-block" style="font-size: 0.75rem;">DIFFICULTY</span>
+          <strong class="text-warning">{{ case.difficulty }}</strong>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="p-2 px-3 bg-dark border border-secondary rounded font-mono small">
+          <span class="text-muted d-block" style="font-size: 0.75rem;">EST. DURATION</span>
+          <strong class="text-light">{{ case.estimated_time }}</strong>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="p-2 px-3 bg-dark border border-secondary rounded font-mono small">
+          <span class="text-muted d-block" style="font-size: 0.75rem;">SUSPECT COUNT</span>
+          <strong class="text-gold">{{ case.suspects.count }} Persons</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Victim Profile -->
+    <div class="mb-4 p-3 bg-dark rounded border-start border-4 border-danger">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <i class="bi bi-person-x-fill text-danger fs-5"></i>
+        <h5 class="font-serif text-light mb-0">Victim Dossier: {{ case.victim_name }}</h5>
+      </div>
+      <p class="text-light small mb-0 mt-2 font-mono" style="color: #E2E8F0 !important; font-size: 0.95rem; line-height: 1.6;">
+        {{ case.victim_profile }}
+      </p>
+    </div>
+
+    <!-- Initial Findings -->
+    <div class="mb-4">
+      <h5 class="font-serif text-gold mb-2"><i class="bi bi-clipboard-pulse me-2"></i> Initial Field Findings</h5>
+      <p class="text-light fs-6" style="color: #F3F4F6 !important; line-height: 1.7;">
+        {{ case.initial_findings }}
+      </p>
+    </div>
+
+    <!-- Known Circumstances -->
+    <div class="mb-4">
+      <h5 class="font-serif text-gold mb-2"><i class="bi bi-clock-history me-2"></i> Known Timeline & Circumstances</h5>
+      <p class="text-light fs-6" style="color: #E2E8F0 !important; line-height: 1.7;">
+        {{ case.known_circumstances }}
+      </p>
+    </div>
+
+    <!-- Tactical Mission Directives -->
+    <div class="mb-4 p-3 bg-dark border border-secondary rounded font-mono small">
+      <h6 class="text-crimson font-mono fw-bold mb-2 text-uppercase"><i class="bi bi-crosshair me-1"></i> Detective Bureau Objectives</h6>
+      <ul class="text-light mb-0 ps-3" style="color: #E2E8F0 !important; line-height: 1.6;">
+        <li>Examine the primary crime scene coordinates and catalog all forensic evidence.</li>
+        <li>Conduct recorded interrogations with all four persons of interest.</li>
+        <li>Identify verbal contradictions between stated alibis and recovered physical clues.</li>
+        <li>Connect findings on the evidence corkboard to establish means, motive, and opportunity.</li>
+        <li>Submit your final accusation warrant with verified motive and supporting evidence.</li>
+      </ul>
+    </div>
+
+    <!-- Fictional Notice -->
+    <div class="p-3 bg-dark border border-secondary rounded small font-mono mb-4" style="color: #CBD5E1 !important;">
+      <i class="bi bi-info-circle me-1 text-gold"></i>
+      <strong class="text-gold">Bureau Protocol Notice:</strong> All persons, locations, corporate entities, forensic records, and events described in this dossier are completely fictional for educational puzzle evaluation.
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex flex-wrap gap-3 pt-3 border-top border-secondary">
+      <a href="{% url 'investigation' case.slug %}" class="btn btn-crimson btn-lg font-mono flex-grow-1 text-center py-3">
+        <i class="bi bi-shield-check me-2"></i> 
+        {% if is_resumed %}RESUME INVESTIGATION{% else %}COMMENCE CRIME SCENE INVESTIGATION{% endif %}
+      </a>
+      <a href="{% url 'cases_list' %}" class="btn btn-bureau-secondary font-mono px-4">
+        Return to Repository
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

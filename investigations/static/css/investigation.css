@@ -1,0 +1,290 @@
+/* CASE CLOSED: Investigation Workspace Stylesheet */
+
+/* Workspace Grid Layout */
+.investigation-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 72px);
+  background-color: var(--bg-primary);
+}
+
+.investigation-header-bar {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-muted);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  z-index: 20;
+}
+
+.workspace-nav-tabs .nav-link {
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: all 0.15s ease;
+}
+
+.workspace-nav-tabs .nav-link:hover {
+  color: var(--text-main);
+  background-color: var(--bg-elevated);
+}
+
+.workspace-nav-tabs .nav-link.active {
+  color: var(--accent-gold);
+  background-color: var(--bg-elevated);
+  border-color: var(--border-muted);
+  border-bottom-color: var(--accent-gold);
+  border-bottom-width: 2px;
+}
+
+/* Crime Scene Exploration Area */
+.crime-scene-viewport {
+  position: relative;
+  width: 100%;
+  height: 580px;
+  background-color: #0E1218;
+  border: 1px solid var(--border-muted);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+}
+
+/* Atmospheric room background illustration via procedural SVG/CSS */
+.scene-bg-study {
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(214, 180, 106, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #090B0E 0%, #151921 50%, #0A0D11 100%);
+  background-size: cover;
+}
+
+.scene-bg-museum {
+  background: 
+    radial-gradient(circle at 48% 40%, rgba(198, 40, 61, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #0A0C10 0%, #161C24 50%, #0B0E14 100%);
+}
+
+.scene-bg-observatory {
+  background: 
+    radial-gradient(circle at 52% 45%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #080A0D 0%, #131922 50%, #07090C 100%);
+}
+
+/* Floor grid perspective lines */
+.scene-grid-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+
+/* Hotspot Interactive Markers */
+.scene-hotspot-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(18, 22, 28, 0.85);
+  border: 2px solid var(--accent-gold);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 15px rgba(214, 180, 106, 0.35);
+  z-index: 10;
+}
+
+.scene-hotspot-marker:hover, .scene-hotspot-marker:focus {
+  transform: translate(-50%, -50%) scale(1.22);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+  background: var(--accent-crimson);
+  box-shadow: 0 0 25px rgba(198, 40, 61, 0.75);
+  outline: none;
+}
+
+.scene-hotspot-marker.discovered {
+  border-color: var(--status-success);
+  color: var(--status-success);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+.scene-hotspot-marker::before {
+  content: "";
+  position: absolute;
+  top: -6px; left: -6px; right: -6px; bottom: -6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(214, 180, 106, 0.4);
+  animation: rotate-pulse 8s linear infinite;
+}
+
+@keyframes rotate-pulse {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.hotspot-tooltip {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(11, 13, 16, 0.95);
+  border: 1px solid var(--border-muted);
+  color: var(--text-main);
+  padding: 0.35rem 0.75rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 15;
+}
+
+.scene-hotspot-marker:hover .hotspot-tooltip {
+  opacity: 1;
+}
+
+/* Suspect Cards & Interrogation */
+.suspect-avatar-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 4px;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--accent-gold);
+}
+
+.dialogue-bubble {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #F1F5F9;
+}
+
+.dialogue-bubble.player-question {
+  border-left-color: var(--accent-crimson);
+  background-color: rgba(198, 40, 61, 0.05);
+}
+
+.contradiction-banner {
+  background: linear-gradient(90deg, rgba(198, 40, 61, 0.25), rgba(198, 40, 61, 0.05));
+  border: 1px solid var(--accent-crimson);
+  color: #FFC0C8;
+  padding: 0.85rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: alert-flash 0.5s ease-in-out;
+}
+
+@keyframes alert-flash {
+  0% { transform: scale(0.96); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Evidence Corkboard Canvas */
+.corkboard-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 600px;
+  background-color: #171512;
+  background-image: 
+    radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.85) 100%);
+  background-size: 20px 20px, 100% 100%;
+  border: 4px solid #322A22;
+  border-radius: 6px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.corkboard-svg-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cork-card {
+  background-color: #FFFDF9;
+  color: #1B1E24;
+  border-radius: 2px;
+  padding: 1rem;
+  width: 210px;
+  box-shadow: 2px 4px 14px rgba(0,0,0,0.6);
+  border-top: 6px solid #D6B46A;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+  z-index: 8;
+  position: relative;
+}
+
+.cork-card:hover {
+  transform: translateY(-4px) rotate(-1deg);
+  box-shadow: 4px 8px 20px rgba(0,0,0,0.8);
+}
+
+.cork-card.selected {
+  outline: 3px solid var(--accent-crimson);
+}
+
+.cork-pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FF5A6E, #C6283D);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  border: 1px solid #781320;
+}
+
+/* Accusation Modal & Outcome */
+.reveal-modal-header {
+  border-bottom: 2px solid var(--accent-crimson);
+  background-color: var(--bg-secondary);
+}
+
+.verdict-box {
+  padding: 2rem;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.verdict-success {
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(18, 22, 28, 0.95) 100%);
+  border: 2px solid var(--status-success);
+}
+
+.verdict-failed {
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(18, 22, 28, 0.95) 100%);
+  border: 2px solid var(--status-danger);
+}

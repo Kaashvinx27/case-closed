@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Field Protocol & Investigation Manual — CASE CLOSED{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5" style="max-width: 960px;">
+  <div class="dossier-card border-secondary mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="stamp-classified">FIELD MANUAL</span>
+      <span class="text-gold font-mono small">STANDARD OPERATIVE PROCEDURE</span>
+    </div>
+    <h1 class="font-serif display-4 text-light mb-3">Bureau Investigation Protocol</h1>
+    <p class="lead text-muted">
+      This manual outlines the systematic investigative methodology required to observe crime scenes, expose alibi falsehoods, and construct logically airtight murder warrants.
+    </p>
+  </div>
+
+  <!-- 10 Step Investigation Methodology -->
+  <div class="dossier-card mb-4">
+    <h3 class="font-serif text-gold mb-4 pb-2 border-bottom border-secondary">
+      <i class="bi bi-list-ol text-crimson me-2"></i> The Ten Rules of Detective Deduction
+    </h3>
+
+    <div class="row g-4 font-mono small">
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">01. Select an Open Case Dossier</strong>
+          <p class="text-muted mb-0">Browse the repository and choose an active case file matched to your difficulty preference.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">02. Study the Briefing & Timeline</strong>
+          <p class="text-muted mb-0">Note down the incident time, victim background, and initial coroner findings.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">03. Search Crime Scene Coordinates</strong>
+          <p class="text-muted mb-0">Inspect glowing coordinate markers on the crime scene map to catalog physical objects and documents.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">04. Analyze Forensic Notes</strong>
+          <p class="text-muted mb-0">Read chemical toxicology, ballistics, and document provenance in the evidence detail modal.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">05. Question Every Suspect</strong>
+          <p class="text-muted mb-0">Interview all persons of interest regarding their stated alibis, motives, and whereabouts.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">06. Establish Contradictions</strong>
+          <p class="text-muted mb-0">When a suspect's claim conflicts directly with cataloged evidence, confront them to establish a formal contradiction.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">07. Connect Corkboard Red Strings</strong>
+          <p class="text-muted mb-0">Link clues and suspects on the corkboard canvas to visually establish relationships and timeline leaks.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">08. Consult Bureau Hints Prudently</strong>
+          <p class="text-muted mb-0">First hints are free; deeper hints deduct points from your final evaluation score.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">09. Submit Final Accusation Warrant</strong>
+          <p class="text-muted mb-0">Select the perpetrator, specify their underlying motive, check supporting evidence, and detail deduction reasoning.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-3 bg-dark border border-secondary rounded h-100">
+          <strong class="text-gold fs-6 d-block mb-1">10. Review Outcome & Epilogue</strong>
+          <p class="text-muted mb-0">The backend validates your warrant against the sealed solution and calculates your official score and detective rank.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Worked Example Deduction -->
+  <div class="dossier-card mb-4">
+    <h4 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+      <i class="bi bi-lightbulb text-gold me-2"></i> Case Study: Anatomy of a Contradiction
+    </h4>
+    <div class="p-3 bg-dark border border-secondary rounded font-mono small">
+      <p class="text-muted mb-2">
+        <strong class="text-light">Hypothetical Scenario:</strong> Suspect claims: <em>"I never touched the study safe and spent the evening watching television in the library from 10:00 to 11:30 PM."</em>
+      </p>
+      <div class="p-2 mb-2 bg-elevated rounded border-start border-3 border-danger">
+        <strong class="text-crimson">Discovered Evidence Clue:</strong> Library power logbook reveals the television circuit breaker tripped at 10:05 PM and remained unpowered until morning.
+      </div>
+      <p class="text-gold mb-0">
+        <i class="bi bi-check-circle-fill me-1"></i> <strong>Contradiction Deduction:</strong> Confronting the suspect with the breaker log proves the alibi is fabricated, unlocking admissions of unauthorized presence near the safe.
+      </p>
+    </div>
+  </div>
+
+  <!-- Scoring Table -->
+  <div class="dossier-card">
+    <h4 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+      <i class="bi bi-trophy text-gold me-2"></i> Bureau Scoring Structure
+    </h4>
+
+    <div class="table-responsive">
+      <table class="table table-dark table-bordered font-mono small mb-0">
+        <thead class="bg-secondary text-gold">
+          <tr>
+            <th>Investigative Action</th>
+            <th>Score Adjustment</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cataloging Crime Scene Evidence</td>
+            <td class="text-success fw-bold">+25 PTS</td>
+            <td>Per unique physical clue or document cataloged</td>
+          </tr>
+          <tr>
+            <td>Establishing Suspect Contradiction</td>
+            <td class="text-success fw-bold">+50 PTS</td>
+            <td>Awarded when suspect statement is refuted with evidence</td>
+          </tr>
+          <tr>
+            <td>Correct Culprit Identified</td>
+            <td class="text-success fw-bold">+200 PTS</td>
+            <td>Primary arrest warrant upheld by the Bureau</td>
+          </tr>
+          <tr>
+            <td>Correct Motive Verified</td>
+            <td class="text-success fw-bold">+100 PTS</td>
+            <td>Underlying motive matches confidential case solution</td>
+          </tr>
+          <tr>
+            <td>Supporting Evidence Identified</td>
+            <td class="text-success fw-bold">+100 PTS</td>
+            <td>At least 60% of critical corroborating evidence submitted</td>
+          </tr>
+          <tr>
+            <td>Bureau Hint Consultation (Level 2)</td>
+            <td class="text-danger fw-bold">-25 PTS</td>
+            <td>Specific investigative direction requested</td>
+          </tr>
+          <tr>
+            <td>Bureau Hint Consultation (Level 3)</td>
+            <td class="text-danger fw-bold">-50 PTS</td>
+            <td>Critical forensic deduction intelligence requested</td>
+          </tr>
+          <tr>
+            <td>Innocent Suspect Falsely Accused</td>
+            <td class="text-danger fw-bold">-50 PTS</td>
+            <td>Arrest warrant dismissed due to unrefuted alibi</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{% url 'cases_list' %}" class="btn btn-crimson font-mono px-4">
+        <i class="bi bi-folder-check me-2"></i> Enter Active Case Repository
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

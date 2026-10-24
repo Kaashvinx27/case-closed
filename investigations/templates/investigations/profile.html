@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Investigator Dossier: {{ profile.user.username }} — CASE CLOSED{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <!-- Profile Header Card -->
+  <div class="dossier-card border-secondary mb-4">
+    <div class="row align-items-center g-4">
+      <div class="col-md-7">
+        <div class="d-flex align-items-center gap-3">
+          <div class="suspect-avatar-box border-warning" style="width: 80px; height: 80px; font-size: 2.5rem;">
+            <i class="bi bi-person-badge-fill text-gold"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h1 class="font-serif text-light mb-0">{{ profile.user.username }}</h1>
+              <span class="badge badge-gold font-mono">{{ profile.badge_number }}</span>
+            </div>
+            <div class="font-mono text-muted small mt-1">
+              Title: <span class="text-gold fw-bold">{{ profile.rank }}</span> &bull; 
+              Operative since: {{ profile.created_at|date:"M Y" }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5 text-md-end">
+        <div class="d-inline-flex gap-3 text-start">
+          <div class="p-3 bg-dark border border-secondary rounded">
+            <span class="font-mono text-muted small d-block">TOTAL SCORE</span>
+            <strong class="font-serif text-gold fs-3">{{ profile.total_score }}</strong>
+          </div>
+          <div class="p-3 bg-dark border border-secondary rounded">
+            <span class="font-mono text-muted small d-block">SOLVED CASES</span>
+            <strong class="font-serif text-crimson fs-3">{{ profile.cases_solved }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left: Solved Cases History -->
+    <div class="col-lg-7">
+      <div class="dossier-card mb-4">
+        <h4 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+          <i class="bi bi-file-earmark-check text-gold me-2"></i> Official Solved Warrants
+        </h4>
+
+        {% if completed_results %}
+          <div class="d-flex flex-column gap-3">
+            {% for r in completed_results %}
+              <div class="p-3 bg-dark border border-secondary rounded">
+                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                  <div>
+                    <span class="badge badge-gold font-mono">{{ r.case.case_number }}</span>
+                    <strong class="font-serif text-light ms-2 fs-6">{{ r.case.title }}</strong>
+                  </div>
+                  <span class="badge {% if r.is_solved %}bg-success{% else %}bg-danger{% endif %} font-mono">
+                    {% if r.is_solved %}SOLVED{% else %}UNSOLVED{% endif %}
+                  </span>
+                </div>
+
+                <div class="row g-2 font-mono small text-muted">
+                  <div class="col-sm-4">
+                    <span>Score:</span> <strong class="text-warning">{{ r.final_score }} PTS</strong>
+                  </div>
+                  <div class="col-sm-4">
+                    <span>Rank:</span> <span class="text-gold">{{ r.rank_awarded }}</span>
+                  </div>
+                  <div class="col-sm-4">
+                    <span>Duration:</span> <span class="text-light">{{ r.time_taken_seconds|divisibleby:60 }}m</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted font-mono small">
+            <i class="bi bi-folder2-open fs-2 text-dim d-block mb-2"></i>
+            No closed investigation files recorded under this badge.<br>
+            <a href="{% url 'cases_list' %}" class="btn btn-sm btn-crimson mt-2 font-mono">Explore Case Files</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Bureau Preferences Form -->
+      <div class="dossier-card">
+        <h5 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+          <i class="bi bi-sliders text-gold me-2"></i> Investigation Preferences
+        </h5>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-check form-switch mb-3 font-mono small">
+            {{ form.sound_enabled }}
+            <label class="form-check-label text-light ms-2" for="{{ form.sound_enabled.id_for_label }}">
+              Enable Bureau Audio Synthesizer Cues
+            </label>
+          </div>
+
+          <div class="form-check form-switch mb-3 font-mono small">
+            {{ form.reduced_motion }}
+            <label class="form-check-label text-light ms-2" for="{{ form.reduced_motion.id_for_label }}">
+              Reduced Visual Motion Mode
+            </label>
+          </div>
+
+          <div class="form-check form-switch mb-3 font-mono small">
+            {{ form.show_timer }}
+            <label class="form-check-label text-light ms-2" for="{{ form.show_timer.id_for_label }}">
+              Display Live Elapsed Investigation Timer
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-sm btn-crimson font-mono px-4">
+            Save Preferences
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: Unlocked Achievements -->
+    <div class="col-lg-5">
+      <div class="dossier-card">
+        <h4 class="font-serif text-light mb-3 pb-2 border-bottom border-secondary">
+          <i class="bi bi-award text-gold me-2"></i> Unlocked Accreditations
+        </h4>
+
+        <div class="d-flex flex-column gap-2">
+          {% for ach in all_achievements %}
+            {% with is_unlocked=False %}
+              <div class="p-3 bg-dark border border-secondary rounded d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-elevated border border-secondary p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                  <i class="bi bi-{{ ach.icon }} fs-4 text-gold"></i>
+                </div>
+                <div>
+                  <h6 class="font-serif text-light mb-0">{{ ach.title }}</h6>
+                  <span class="font-mono text-muted small" style="font-size: 0.75rem;">{{ ach.description }}</span>
+                </div>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
